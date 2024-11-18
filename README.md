@@ -1,6 +1,6 @@
 Air Quality Monitor (Server)
 
-Stack:
+Tech :
 - Express
 - Websocket
 - Mongoose
