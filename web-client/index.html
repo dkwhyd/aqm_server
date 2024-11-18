@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sensor Data Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div>
+      <h1>Sensor Real Time</h1>
+
+      <!-- Dropdown menu untuk memilih device -->
+      <label for="deviceSelectRealTime">Pilih Device:</label>
+      <select id="deviceSelectRealTime">
+        <option value="device123" selected>Device 123</option>
+        <option value="device321">Device 321</option>
+      </select>
+
+      <!-- Canvas untuk chart -->
+      <canvas id="sensorsRealTime" width="800" height="400"></canvas>
+    </div>
+
+    <br />
+    <div>
+      <h1>Sensor Data Hours</h1>
+
+      <!-- Dropdown menu untuk memilih device -->
+      <label for="deviceSelectHours">Pilih Device:</label>
+      <select id="deviceSelectHours">
+        <option value="device123" selected>Device 123</option>
+        <option value="device321">Device 321</option>
+      </select>
+
+      <!-- Canvas untuk chart -->
+      <canvas id="sensorsHours" width="800" height="400"></canvas>
+    </div>
+
+    <script>
+      // Fungsi untuk mengambil data dari server berdasarkan device
+      async function fetchSensorDataRealTime(deviceId) {
+        try {
+          const response = await fetch(
+            `http://localhost:9001/api/sensors/realtime/${deviceId}`
+          );
+          const data = await response.json();
+          console.log(data);
+
+          return data;
+        } catch (error) {
+          console.error("Error fetching sensor data:", error);
+          return [];
+        }
+      }
+
+      // Fungsi untuk menampilkan grafik dengan Chart.js
+      async function renderChartRealTime(deviceId) {
+        const data = await fetchSensorDataRealTime(deviceId);
+
+        // Memetakan data untuk grafik
+        const labels = data.map((item) => new Date(item.date).toLocaleString());
+        const pm2Values = data.map((item) => parseFloat(item.pm2));
+        const co2Values = data.map((item) => parseFloat(item.co2));
+        const so2Values = data.map((item) => parseFloat(item.so2));
+        const temperaturValues = data.map((item) =>
+          parseFloat(item.temperatur)
+        );
+
+        // Mendapatkan konteks canvas untuk chart
+        const ctx = document.getElementById("sensorsRealTime").getContext("2d");
+
+        // Hapus chart yang lama sebelum merender ulang
+        if (window.chartRealTimeInstance) {
+          window.chartRealTimeInstance.destroy();
+        }
+
+        // Membuat grafik baru
+        window.chartRealTimeInstance = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "PM2.5",
+                data: pm2Values,
+                borderColor: "rgba(255, 99, 132, 1)",
+                borderWidth: 1,
+                fill: false,
+              },
+              {
+                label: "CO2",
+                data: co2Values,
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 1,
+                fill: false,
+              },
+              {
+                label: "SO2",
+                data: so2Values,
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 1,
+                fill: false,
+              },
+              {
+                label: "Temperatur",
+                data: temperaturValues,
+                borderColor: "rgba(153, 102, 255, 1)",
+                borderWidth: 1,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                title: { display: true, text: "Timestamp" },
+              },
+              y: {
+                title: { display: true, text: "Values" },
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+      }
+
+      // Fungsi untuk menangani perubahan dropdown Real Time
+      document
+        .getElementById("deviceSelectRealTime")
+        .addEventListener("change", (event) => {
+          const selectedDevice = event.target.value;
+          renderChartRealTime(selectedDevice);
+        });
+
+      // Memuat grafik dengan device default (device123)
+      renderChartRealTime("device123");
+
+      async function fetchSensorDataHours(deviceId) {
+        try {
+          const response = await fetch(
+            `http://localhost:9001/api/sensors/fiveteen/${deviceId}`
+          );
+          const data = await response.json();
+          console.log(data);
+
+          return data;
+        } catch (error) {
+          console.error("Error fetching sensor data:", error);
+          return [];
+        }
+      }
+
+      async function renderChartHours(deviceId) {
+        const data = await fetchSensorDataHours(deviceId);
+
+        // Memetakan data untuk grafik
+        const labels = data.map((item) => new Date(item.date).toLocaleString());
+        const pm2Values = data.map((item) => parseFloat(item.pm2));
+        const co2Values = data.map((item) => parseFloat(item.co2));
+        const so2Values = data.map((item) => parseFloat(item.so2));
+        const temperaturValues = data.map((item) =>
+          parseFloat(item.temperatur)
+        );
+
+        // Mendapatkan konteks canvas untuk chart
+        const ctx = document.getElementById("sensorsHours").getContext("2d");
+
+        // Hapus chart yang lama sebelum merender ulang
+        if (window.chartHoursInstance) {
+          window.chartHoursInstance.destroy();
+        }
+
+        // Membuat grafik baru
+        window.chartHoursInstance = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "PM2.5",
+                data: pm2Values,
+                borderColor: "rgba(255, 99, 132, 1)",
+                borderWidth: 1,
+                fill: false,
+              },
+              {
+                label: "CO2",
+                data: co2Values,
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 1,
+                fill: false,
+              },
+              {
+                label: "SO2",
+                data: so2Values,
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 1,
+                fill: false,
+              },
+              {
+                label: "Temperatur",
+                data: temperaturValues,
+                borderColor: "rgba(153, 102, 255, 1)",
+                borderWidth: 1,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                title: { display: true, text: "Timestamp" },
+              },
+              y: {
+                title: { display: true, text: "Values" },
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+      }
+
+      // Fungsi untuk menangani perubahan dropdown Hours
+      document
+        .getElementById("deviceSelectHours")
+        .addEventListener("change", (event) => {
+          const selectedDevice = event.target.value;
+          renderChartHours(selectedDevice);
+        });
+
+      // Memuat grafik dengan device default (device123)
+      renderChartHours("device123");
+    </script>
+  </body>
+</html>
